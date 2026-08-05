@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
 import ReactDOM from "react-dom/client";
+import { Provider } from "react-redux";
 import "./index.css";
 import App from "./App.jsx";
 import { createBrowserRouter } from "react-router";
@@ -14,6 +14,12 @@ import Layout from "./Layout.jsx";
 import AuthLayout from "./layout/AuthLayout.jsx";
 import LoginComponent from "./components/auth/LoginComponent.jsx";
 import RegisterComponent from "./components/auth/RegisterComponent.jsx";
+import VerifyEmailComponent from "./components/auth/VerifyEmailComponent.jsx";
+import { makeStore } from "./lib/store.js";
+import SessionInitializer from "./lib/SessionInitializer.jsx";
+import ProductsManagementPage from "./pages/dashboard/ProductsManagementPage.jsx";
+import TableDataPage from "./pages/dashboard/TableDataPage.jsx";
+import UsersManagementPage from "./pages/dashboard/UsersManagementPage.jsx";
 
 const router = createBrowserRouter([
   // dashboardlayout
@@ -23,11 +29,15 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/dashboard/table-data",
-        element: <h1>Table Data</h1>,
+        element: <TableDataPage />,
+      },
+      {
+        path: "/dashboard/products",
+        element: <ProductsManagementPage />,
       },
       {
         path: "/dashboard/users",
-        element: <h1>Users Dashboard</h1>,
+        element: <UsersManagementPage />,
       },
     ],
   },
@@ -66,6 +76,10 @@ const router = createBrowserRouter([
       {
         path: '/auth/register',
         element: <RegisterComponent/>
+      },
+      {
+        path: '/auth/verify-email',
+        element: <VerifyEmailComponent/>
       }
     ]
   },
@@ -78,4 +92,12 @@ const router = createBrowserRouter([
 
 const root = document.getElementById("root");
 
-ReactDOM.createRoot(root).render(<RouterProvider router={router} />);
+ReactDOM.createRoot(root).render(
+  <StrictMode>
+    <Provider store={makeStore()}>
+      <SessionInitializer>
+        <RouterProvider router={router} />
+      </SessionInitializer>
+    </Provider>
+  </StrictMode>,
+);

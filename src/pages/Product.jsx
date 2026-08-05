@@ -1,26 +1,39 @@
-import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import ProductDetailComponent from "../components/products/ProductDetailComponent";
+import LoadingComponent from "../components/LoadingComponent";
+import { useGetProductQuery } from "../features/products/productsApi";
 
 export default function Product() {
-  const [detailProduct, setDetailProduct] = useState({});
-
   const { uuid } = useParams();
-  console.log(`==> uuid: ${uuid}`)
 
-  useEffect( () => {
-     const loader = async() => {
-       const response = await fetch(
-      `${import.meta.env.VITE_BASE_ISHOP_URL}/products/${uuid}`,
+  const {
+    data: product = {},
+    isLoading,
+    isError,
+    error,
+  } = useGetProductQuery(uuid);
+
+  if (isLoading) {
+    return <LoadingComponent />;
+  }
+
+  if (isError) {
+    return (
+      <div className="container mx-auto p-8 text-center">
+        <p className="text-lg font-semibold text-red-600">
+          Failed to load product.
+        </p>
+        <p className="mt-2 text-sm text-gray-500">
+          {error?.status
+            ? `Server returned ${error.status}`
+            : error?.message || "Product not found."}
+        </p>
+      </div>
     );
-    console.log(`==> REsponse: ${response}`)
-    const singleProduct = await response.json();
-    setDetailProduct(singleProduct);
-     }
-     loader()
-  },[uuid]);
+  }
 
-  const { name, description, thumbnail, priceOut } = detailProduct;
+  const { name, description, thumbnail, priceOut } = product;
+
   return (
     <ProductDetailComponent
       title={name}

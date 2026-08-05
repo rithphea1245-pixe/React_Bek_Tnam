@@ -11,7 +11,7 @@ export default function SideBarDashboard() {
   </div>
   <nav className="text-sm text-gray-300">
     <ul className="flex flex-col">
-      <li className="px-4 cursor-pointer bg-gray-500 text-gray-800 hover:bg-gray-700  hover:text-white">
+      <li className="px-4 cursor-pointer hover:bg-gray-700">
         <a className="py-3 flex items-center" href="/">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -24,17 +24,36 @@ export default function SideBarDashboard() {
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"
+              d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
             />
           </svg>
           Dashboard
+        </a>
+      </li>
+      <li className="px-4 cursor-pointer hover:bg-gray-700">
+        <a className="py-3 flex items-center" href="/dashboard/table-data">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="1.5"
+            stroke="currentColor"
+            className="w-4 mr-3"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+            />
+          </svg>
+          Table Data
         </a>
       </li>
       <li className="px-4 py-2 text-xs uppercase tracking-wider text-gray-500 font-bold">
         USER MANAGEMENT
       </li>
       <li className="px-4 cursor-pointer hover:bg-gray-700">
-        <a className="py-3 flex items-center" href="/">
+        <a className="py-3 flex items-center" href="/dashboard/users">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -118,7 +137,7 @@ export default function SideBarDashboard() {
         </a>
       </li>
       <li className="px-4 cursor-pointer hover:bg-gray-700">
-        <a className="py-3 flex items-center" href="/">
+        <a className="py-3 flex items-center" href="/dashboard/products">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

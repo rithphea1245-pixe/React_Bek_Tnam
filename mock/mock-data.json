@@ -1,0 +1,233 @@
+{
+  "_readme": "Mock data for the iShop dashboard app (D:\\Hello_React\\react-foundation). Base URL from .env: VITE_BASE_ISHOP_URL = https://ishop.cheat.casa/api/v1",
+  "auth": {
+    "login": {
+      "method": "POST",
+      "url": "/auth/login",
+      "requestBody": {
+        "email": "sokcheatsrorng@gmail.com",
+        "password": "Cheat11$$"
+      },
+      "response": {
+        "type": "Bearer",
+        "accessToken": "eyJraWQiOiJzaWduYXR1cmUua2V5IiwidHlwIjoiSldUIn0...",
+        "refreshToken": "eyJraWQiOiJzaWduYXR1cmUua2V5IiwidHlwIjoiSldUIn0..."
+      }
+    },
+    "refresh": {
+      "method": "POST",
+      "url": "/auth/refresh",
+      "requestBody": { "refreshToken": "..." }
+    },
+    "signup": {
+      "method": "POST",
+      "url": "/users/user-signup?emailVerified=true",
+      "requestBody": {
+        "username": "demo1234567",
+        "email": "demo1234567@web-library.net",
+        "phoneNumber": "012345678",
+        "address": {
+          "addressLine1": "Phnom Penh, Toul Kork",
+          "addressLine2": "Sangkat Boeung Kak",
+          "road": "Street 105",
+          "linkAddress": "https://maps.google.com/?q=Phnom+Penh"
+        },
+        "profile": "",
+        "password": "StrongPass1@",
+        "confirmPassword": "StrongPass1@"
+      },
+      "response": { "message": "User registered successfully" }
+    },
+    "me": {
+      "method": "GET",
+      "url": "/users/me",
+      "response": {
+        "uuid": "5b7b2a1f-2051-469f-ba57-497d81f47a59",
+        "username": "iIUB6cN2elcJXVDNBiZT",
+        "email": "sokcheatsrorng@gmail.com",
+        "phoneNumber": "string",
+        "profile": "https://i.pinimg.com/736x/7e/e9/59/7ee959e655073975fc73f8a65ca50f93.jpg",
+        "isDeleted": false,
+        "emailVerified": true,
+        "roles": [{ "name": "ADMIN" }],
+        "address": {
+          "uuid": "29c04bc1-589c-44c0-b488-eedc55faf6ac",
+          "addressLine1": "string",
+          "addressLine2": "string",
+          "road": "string",
+          "linkAddress": "string"
+        }
+      }
+    }
+  },
+  "products": {
+    "list": {
+      "method": "GET",
+      "url": "/products?page=0&size=10",
+      "response": {
+        "content": [
+          {
+            "uuid": "b0ac6131-2ad3-4f4b-87c2-0bc02684fb58",
+            "name": "iPhone 17 Pro Max",
+            "description": "Premium minimalist t-shirt perfect for summer vibes.",
+            "computerSpec": {
+              "processor": "Intel Core i7-1360P 12-Core (up to 5.0GHz)",
+              "ram": "16GB LPDDR5 5200MHz",
+              "storage": "512GB NVMe PCIe Gen 4 SSD",
+              "gpu": "NVIDIA GeForce RTX 3050 4GB GDDR6",
+              "os": "Windows 11 Pro",
+              "screenSize": "15.6 inch FHD IPS 144Hz Anti-Glare",
+              "battery": "72Wh Li-Ion, up to 12 hours"
+            },
+            "stockQuantity": 120,
+            "priceOut": 24.99,
+            "discount": 15.0,
+            "color": [
+              {
+                "color": "Classic Black",
+                "images": ["https://assets.example.com/horizon-tee-black-front.jpg"]
+              }
+            ],
+            "thumbnail": "https://cdsassets.apple.com/live/7WUAS350/images/tech-specs/iphone-17-pro-17-pro-max-hero.png",
+            "images": [],
+            "filteredImage": null,
+            "warranty": "Lifetime Quality Guarantee",
+            "availability": true,
+            "category": {
+              "uuid": "462d9f60-8346-45ab-b8b3-a597d240965b",
+              "name": "Summer Vibes Collection"
+            },
+            "supplier": {
+              "uuid": "7dd85516-733b-4d47-a445-583c225fb833",
+              "name": "Jane Mitchell"
+            },
+            "brand": {
+              "uuid": "8f2e3bcb-bb0b-45a1-b9bc-1d43f08f0ddb",
+              "name": "string"
+            }
+          }
+        ],
+        "pageable": { "pageNumber": 0, "pageSize": 10 },
+        "totalElements": 191,
+        "totalPages": 20,
+        "number": 0
+      }
+    },
+    "create": {
+      "method": "POST",
+      "url": "/products",
+      "requestBody": {
+        "name": "New Product",
+        "description": "Short description",
+        "priceIn": 10,
+        "priceOut": 20,
+        "discount": 0,
+        "stockQuantity": 5,
+        "thumbnail": "https://example.com/image.png",
+        "warranty": "1y",
+        "availability": true,
+        "categoryUuid": "462d9f60-8346-45ab-b8b3-a597d240965b",
+        "brandUuid": "8f2e3bcb-bb0b-45a1-b9bc-1d43f08f0ddb",
+        "supplierUuid": "7dd85516-733b-4d47-a445-583c225fb833",
+        "computerSpec": {}
+      },
+      "note": "computerSpec is REQUIRED on create (can be {}) - otherwise the API returns 500.",
+      "response": { "message": "Product created successfully" }
+    },
+    "update": {
+      "method": "PUT",
+      "url": "/products/{uuid}",
+      "requestBody": {
+        "name": "Updated Product",
+        "description": "Updated description",
+        "priceIn": 11,
+        "priceOut": 22,
+        "discount": 5,
+        "stockQuantity": 7,
+        "thumbnail": "https://example.com/image.png",
+        "warranty": "2y",
+        "availability": false,
+        "categoryUuid": "462d9f60-8346-45ab-b8b3-a597d240965b",
+        "brandUuid": "8f2e3bcb-bb0b-45a1-b9bc-1d43f08f0ddb",
+        "supplierUuid": "7dd85516-733b-4d47-a445-583c225fb833"
+      },
+      "note": "DO NOT include computerSpec on PUT - the ProductUpdateRequest DTO rejects it with a 500.",
+      "response": {
+        "uuid": "500126b0-3654-4935-a71a-fbaf0f65c69f",
+        "name": "Updated Product",
+        "priceOut": 22,
+        "availability": false
+      }
+    },
+    "delete": {
+      "method": "DELETE",
+      "url": "/products/{uuid}",
+      "note": "Returns 204. Only products created by the logged-in user can be deleted (403 otherwise).",
+      "response": null
+    }
+  },
+  "categories": {
+    "method": "GET",
+    "url": "/categories",
+    "response": [
+      {
+        "uuid": "462d9f60-8346-45ab-b8b3-a597d240965b",
+        "name": "Summer Vibes Collection",
+        "description": "A curated selection of seasonal essentials."
+      },
+      { "uuid": "6c0444d4-0000-0000-0000-000000000000", "name": "Summer Vibes Collection v1" },
+      { "uuid": "6abd6b9a-0000-0000-0000-000000000000", "name": "Productv1" }
+    ]
+  },
+  "brands": {
+    "method": "GET",
+    "url": "/brands",
+    "response": [
+      { "uuid": "8f2e3bcb-bb0b-45a1-b9bc-1d43f08f0ddb", "name": "string" },
+      { "uuid": "c273f461-0000-0000-0000-000000000000", "name": "Horizon Apparel" }
+    ]
+  },
+  "suppliers": {
+    "method": "GET",
+    "url": "/suppliers",
+    "response": [
+      { "uuid": "a34496d2-370e-4332-8c6d-b4a6bc069bf1", "name": "string" },
+      {
+        "uuid": "7dd85516-733b-4d47-a445-583c225fb833",
+        "name": "Jane Mitchell",
+        "email": "jane.mitchell@example.com",
+        "phone": "+1-555-342-8801"
+      }
+    ]
+  },
+  "users": {
+    "method": "GET",
+    "url": "/users/me (authenticated)",
+    "mockRows": [
+      {
+        "uuid": "u-1001",
+        "name": "Sok Cheat Srorng",
+        "email": "sokcheatsrorng@gmail.com",
+        "role": "Admin",
+        "status": "active",
+        "joinedAt": "2024-01-15"
+      },
+      {
+        "uuid": "u-1002",
+        "name": "Jane Mitchell",
+        "email": "jane.mitchell@example.com",
+        "role": "Supplier",
+        "status": "active",
+        "joinedAt": "2024-02-03"
+      },
+      {
+        "uuid": "u-1003",
+        "name": "Robert Chen",
+        "email": "robert.chen@example.com",
+        "role": "Manager",
+        "status": "active",
+        "joinedAt": "2024-03-21"
+      }
+    ]
+  }
+}

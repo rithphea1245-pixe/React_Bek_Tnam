@@ -1,7 +1,24 @@
 
+import { increment } from "../../features/counter/CounterSlice.js";
+import { useAppDispatch, useAppSelector } from "../../lib/hook.js";
+import { useNavigate } from "react-router";
+
 export default function ProductDetailComponent({
   thumbnail, title, price, description
 }) {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const isLogined = Boolean(useAppSelector((state) => state.auth?.token));
+
+  const handleAddToCart = () => {
+    if (!isLogined) {
+      const redirect = encodeURIComponent(window.location.pathname);
+      navigate(`/auth/login?redirect=${redirect}`);
+      return;
+    }
+    dispatch(increment());
+  };
+
   return (
     <main className="max-w-6xl mx-auto p-6 lg:p-10">
   {/* Breadcrumb / Header */}
@@ -132,8 +149,9 @@ export default function ProductDetailComponent({
             <button
               id="addToCart"
               className="ml-auto flex-1 lg:flex-none bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg px-6 py-3 shadow"
+              onClick={handleAddToCart}
             >
-              🛒 Add to Cart
+              🛒 {isLogined ? "Add to Cart" : "Login to Add to Cart"}
             </button>
           </div>
           <p className="text-xs text-gray-400 mt-2">
@@ -203,9 +221,10 @@ export default function ProductDetailComponent({
         <div className="max-w-3xl mx-auto">
           <button
             id="mobileAdd"
+            onClick={handleAddToCart}
             className="w-full bg-green-600 text-white rounded-full py-3 font-semibold shadow-lg"
           >
-            🛒 Add to Cart — ₹450
+            🛒 {isLogined ? "Add to Cart" : "Login to Add to Cart"}
           </button>
         </div>
       </div>
