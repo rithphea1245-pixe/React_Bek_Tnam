@@ -1,3 +1,6 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/__/auth/(.*)", "destination": "https://nodejsxfirebase-40ff6.firebaseapp.com/__/auth/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
