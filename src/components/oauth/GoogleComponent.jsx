@@ -1,5 +1,9 @@
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { useState } from "react";
+import {
+  getRedirectResult,
+  GoogleAuthProvider,
+  signInWithRedirect,
+} from "firebase/auth";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { auth } from "../../firebase/config";
 import { useLoginMutation, useSignupMutation, useUpdateUserMutation } from "../../features/auth/authApi";
@@ -83,7 +87,124 @@ export const GoogleLoginComponent = ({
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const loginWithGoogle = async () => {
+  // Runs after Google returns the account: syncs it with the backend and
+  // stores the session, exactly as the old popup flow did.
+  const completeGoogleLogin = async (googleUser) => {
+    if (!googleUser?.email) {
+      throw new Error("Could not read your Google account information.");
+    }
+
+    const email = googleUser.email;
+    const password = googleShadowPassword(googleUser.uid);
+    const username = googleUsername(googleUser);
+    const profile = googleUser.photoURL || defaultProfileImage(username);
+
+    let result;
+    try {
+      result = await login({ email, password }).unwrap();
+    } catch (loginErr) {
+      // Only reach the register branch when the server answered (e.g. 404
+      // "user not found"). Network failures are thrown straight through.
+      if (typeof loginErr?.status !== "number") {
+        throw loginErr;
+      }
+
+      try {
+        await signup({
+          emailVerified: true,
+          username,
+          email,
+          password,
+          confirmPassword: password,
+          profile,
+          address: {
+            addressLine1: "",
+            addressLine2: "",
+            road: "",
+            linkAddress: "",
+          },
+        }).unwrap();
+        result = await login({ email, password }).unwrap();
+      } catch (signupErr) {
+        if (/(already|exist|registered|duplicate)/i.test(apiErrorMessage(signupErr))) {
+          throw new Error(
+            "This Google email is already registered with a password. Please log in with your email and password instead.",
+          );
+        }
+        throw signupErr;
+      }
+    }
+
+    // Persist the Google photo to the backend account so the avatar keeps
+    // showing after a page refresh (the backend only stores it at signup).
+    if (googleUser.photoURL && googleUser.photoURL !== result.user?.profile) {
+      try {
+        await updateUser({
+          uuid: result.user.uuid,
+          username: result.user.username,
+          profile: googleUser.photoURL,
+          phoneNumber: result.user.phoneNumber || "",
+          address: {
+            addressLine1: result.user.address?.addressLine1 || "",
+            addressLine2: result.user.address?.addressLine2 || "",
+            road: result.user.address?.road || "",
+            linkAddress: result.user.address?.linkAddress || "",
+          },
+        }).unwrap();
+      } catch {
+        // Best-effort: never block sign-in because the avatar could not sync.
+      }
+    }
+
+    // Prefer the live Google photo so the avatar shows even if the backend
+    // account was created earlier with a fallback image.
+    const googleProfile = googleUser.photoURL || result.user?.profile;
+    const sessionUser =
+      googleProfile && googleProfile !== result.user?.profile
+        ? { ...result.user, profile: googleProfile }
+        : result.user;
+
+    dispatch(
+      setCredentials({
+        token: result.accessToken,
+        refreshToken: result.refreshToken,
+        user: sessionUser,
+      }),
+    );
+    navigate(redirectTo);
+  };
+
+  // When the browser brings us back from Google, pick up the signed-in account.
+  useEffect(() => {
+    let cancelled = false;
+    setPending(true);
+    getRedirectResult(auth)
+      .then((res) => {
+        if (cancelled) return;
+        if (res?.user) {
+          return completeGoogleLogin(res.user);
+        }
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        if (
+          err?.code === "auth/popup-closed-by-user" ||
+          err?.code === "auth/cancelled-popup-request"
+        ) {
+          return;
+        }
+        setError(firebaseAuthMessage(err) || apiErrorMessage(err));
+      })
+      .finally(() => {
+        if (!cancelled) setPending(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const loginWithGoogle = () => {
     setError("");
     setPending(true);
 
@@ -93,102 +214,10 @@ export const GoogleLoginComponent = ({
     // different one) can be picked on every sign-in.
     provider.setCustomParameters({ prompt: "select_account" });
 
-    try {
-      const res = await signInWithPopup(auth, provider);
-      const googleUser = res.user;
-      if (!googleUser?.email) {
-        throw new Error("Could not read your Google account information.");
-      }
-
-      const email = googleUser.email;
-      const password = googleShadowPassword(googleUser.uid);
-      const username = googleUsername(googleUser);
-      const profile = googleUser.photoURL || defaultProfileImage(username);
-
-      let result;
-      try {
-        result = await login({ email, password }).unwrap();
-      } catch (loginErr) {
-        // Only reach the register branch when the server answered (e.g. 404
-        // "user not found"). Network failures are thrown straight through.
-        if (typeof loginErr?.status !== "number") {
-          throw loginErr;
-        }
-
-        try {
-          await signup({
-            emailVerified: true,
-            username,
-            email,
-            password,
-            confirmPassword: password,
-            profile,
-            address: {
-              addressLine1: "",
-              addressLine2: "",
-              road: "",
-              linkAddress: "",
-            },
-          }).unwrap();
-          result = await login({ email, password }).unwrap();
-        } catch (signupErr) {
-          if (/(already|exist|registered|duplicate)/i.test(apiErrorMessage(signupErr))) {
-            throw new Error(
-              "This Google email is already registered with a password. Please log in with your email and password instead.",
-            );
-          }
-          throw signupErr;
-        }
-      }
-
-      // Persist the Google photo to the backend account so the avatar keeps
-      // showing after a page refresh (the backend only stores it at signup).
-      if (googleUser.photoURL && googleUser.photoURL !== result.user?.profile) {
-        try {
-          await updateUser({
-            uuid: result.user.uuid,
-            username: result.user.username,
-            profile: googleUser.photoURL,
-            phoneNumber: result.user.phoneNumber || "",
-            address: {
-              addressLine1: result.user.address?.addressLine1 || "",
-              addressLine2: result.user.address?.addressLine2 || "",
-              road: result.user.address?.road || "",
-              linkAddress: result.user.address?.linkAddress || "",
-            },
-          }).unwrap();
-        } catch {
-          // Best-effort: never block sign-in because the avatar could not sync.
-        }
-      }
-
-      // Prefer the live Google photo so the avatar shows even if the backend
-      // account was created earlier with a fallback image.
-      const googleProfile = googleUser.photoURL || result.user?.profile;
-      const sessionUser =
-        googleProfile && googleProfile !== result.user?.profile
-          ? { ...result.user, profile: googleProfile }
-          : result.user;
-
-      dispatch(
-        setCredentials({
-          token: result.accessToken,
-          refreshToken: result.refreshToken,
-          user: sessionUser,
-        }),
-      );
-      navigate(redirectTo);
-    } catch (err) {
-      if (
-        err?.code === "auth/popup-closed-by-user" ||
-        err?.code === "auth/cancelled-popup-request"
-      ) {
-        return;
-      }
-      setError(firebaseAuthMessage(err) || apiErrorMessage(err));
-    } finally {
+    signInWithRedirect(auth, provider).catch((err) => {
       setPending(false);
-    }
+      setError(firebaseAuthMessage(err) || apiErrorMessage(err));
+    });
   };
 
   return (
