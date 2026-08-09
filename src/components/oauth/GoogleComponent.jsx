@@ -1,9 +1,10 @@
 import {
   getRedirectResult,
   GoogleAuthProvider,
+  onAuthStateChanged,
   signInWithRedirect,
 } from "firebase/auth";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { auth } from "../../firebase/config";
 import { useLoginMutation, useSignupMutation, useUpdateUserMutation } from "../../features/auth/authApi";
@@ -86,6 +87,9 @@ export const GoogleLoginComponent = ({
   const [updateUser] = useUpdateUserMutation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  // Prevents completing the same Google account twice (e.g. when both the
+  // redirect result and the session listener fire for the same sign-in).
+  const handledRef = useRef(false);
 
   // Runs after Google returns the account: syncs it with the backend and
   // stores the session, exactly as the old popup flow did.
@@ -175,15 +179,27 @@ export const GoogleLoginComponent = ({
   };
 
   // When the browser brings us back from Google, pick up the signed-in account.
+  // Two paths feed the same handler so it works even if one of them is blocked
+  // by the browser: the redirect result, and Firebase's session listener.
   useEffect(() => {
     let cancelled = false;
+
+    const complete = async (googleUser) => {
+      if (cancelled || handledRef.current) return;
+      handledRef.current = true;
+      try {
+        await completeGoogleLogin(googleUser);
+      } catch (err) {
+        handledRef.current = false;
+        setError(firebaseAuthMessage(err) || apiErrorMessage(err));
+      }
+    };
+
     setPending(true);
     getRedirectResult(auth)
       .then((res) => {
         if (cancelled) return;
-        if (res?.user) {
-          return completeGoogleLogin(res.user);
-        }
+        if (res?.user) return complete(res.user);
       })
       .catch((err) => {
         if (cancelled) return;
@@ -198,8 +214,17 @@ export const GoogleLoginComponent = ({
       .finally(() => {
         if (!cancelled) setPending(false);
       });
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (cancelled) return;
+      if (user?.email && !handledRef.current) {
+        complete(user);
+      }
+    });
+
     return () => {
       cancelled = true;
+      unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
