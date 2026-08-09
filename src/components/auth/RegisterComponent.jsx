@@ -11,6 +11,8 @@ import {
   defaultRegisterValues,
   PASSWORD_RULES,
 } from "../../features/auth/authSchemas";
+import { GoogleLoginComponent } from "../oauth/GoogleComponent";
+import { GithubLoginComponent } from "../oauth/GithubComponent";
 
 function apiErrorMessage(err) {
   const description = err.data?.description;
@@ -19,6 +21,13 @@ function apiErrorMessage(err) {
     return Object.values(description).flat().join(" ");
   }
   return err.data?.message || err.message || "Registration failed.";
+}
+
+// Every new account gets a profile image, even when the user does not
+// provide one. ui-avatars renders the username initials as a fallback avatar.
+function defaultProfileImage(username) {
+  const name = encodeURIComponent(username || "user");
+  return `https://ui-avatars.com/api/?name=${name}&background=002D74&color=fff`;
 }
 
 function fieldClass(hasError) {
@@ -132,7 +141,7 @@ export default function RegisterComponent() {
       },
     };
     if (values.phoneNumber) payload.phoneNumber = values.phoneNumber;
-    if (values.profile) payload.profile = values.profile;
+    payload.profile = values.profile || defaultProfileImage(values.username);
 
     let isNewAccount = true;
     try {
@@ -366,7 +375,10 @@ export default function RegisterComponent() {
 
             <div>
               <label className="block text-gray-700 text-sm mb-2">
-                Profile image <span className="text-gray-400">(optional)</span>
+                Profile image{" "}
+                <span className="text-gray-400">
+                  (optional — a default avatar is applied if empty)
+                </span>
               </label>
               <input
                 type="url"
@@ -418,6 +430,13 @@ export default function RegisterComponent() {
                   : "Sign up"}
             </button>
           </form>
+          <div className="mt-6 flex items-center gap-3 text-gray-400 text-sm">
+            <hr className="flex-1 border-gray-300" />
+            <span>OR</span>
+            <hr className="flex-1 border-gray-300" />
+          </div>
+          <GoogleLoginComponent label="Register with Google" />
+          <GithubLoginComponent />
           <p className="mt-6 text-sm text-center text-gray-600">
             Already have an account?{" "}
             <Link to="/auth/login" className="text-blue-600 hover:underline">

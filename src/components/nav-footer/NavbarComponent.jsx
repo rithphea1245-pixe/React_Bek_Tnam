@@ -10,6 +10,8 @@ import {
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useAppDispatch, useAppSelector } from "../../lib/hook.js";
 import { clearCredentials } from "../../features/auth/authSlice";
+import { signOut } from "firebase/auth";
+import { auth } from "../../firebase/config";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", current: true },
@@ -30,6 +32,9 @@ export default function NavbarComponent() {
 
   const handleSignOut = () => {
     dispatch(clearCredentials());
+    // Also sign out of Firebase so the next Google sign-in starts fresh and
+    // lets you pick any (or a different) Google account.
+    signOut(auth).catch(() => {});
     window.location.href = "/";
   };
   return (
@@ -100,9 +105,17 @@ export default function NavbarComponent() {
               <MenuButton className="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
                 {isLogined ? (
                   <div className="flex items-center gap-2 px-3 py-1.5 text-gray-200 border rounded-lg text-sm">
-                    <span className="size-8 flex items-center justify-center rounded-full bg-gray-600 text-xs font-semibold uppercase">
-                      {(user?.username || user?.email || "U").slice(0, 1)}
-                    </span>
+                    {user?.profile ? (
+                      <img
+                        src={user.profile}
+                        alt={user.username || user.email || "avatar"}
+                        className="size-8 rounded-full object-cover bg-gray-600"
+                      />
+                    ) : (
+                      <span className="size-8 flex items-center justify-center rounded-full bg-gray-600 text-xs font-semibold uppercase">
+                        {(user?.username || user?.email || "U").slice(0, 1)}
+                      </span>
+                    )}
                     <span className="hidden lg:block max-w-[160px] truncate">
                       {user?.email || user?.username || "Account"}
                     </span>

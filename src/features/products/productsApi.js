@@ -1,19 +1,9 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
-const BASE_URL = import.meta.env.VITE_BASE_ISHOP_URL;
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { reauthBaseQuery } from "../auth/reauthBaseQuery";
 
 export const productsApi = createApi({
   reducerPath: "productsApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: BASE_URL,
-    prepareHeaders: (headers, { getState }) => {
-      const token = getState().auth?.token;
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery: reauthBaseQuery,
   tagTypes: ["Product"],
   endpoints: (builder) => ({
     // GET /products?page=&size=&name=

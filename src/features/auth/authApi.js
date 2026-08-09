@@ -1,19 +1,9 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
-const BASE_URL = import.meta.env.VITE_BASE_ISHOP_URL;
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { reauthBaseQuery } from "./reauthBaseQuery";
 
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: BASE_URL,
-    prepareHeaders: (headers, { getState }) => {
-      const token = getState().auth?.token;
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery: reauthBaseQuery,
   tagTypes: ["Auth"],
   endpoints: (builder) => ({
     // POST /auth/login
@@ -64,6 +54,15 @@ export const authApi = createApi({
       query: () => "/users/me",
       providesTags: ["Auth"],
     }),
+    // PUT /users/{uuid}
+    updateUser: builder.mutation({
+      query: ({ uuid, ...body }) => ({
+        url: `/users/${uuid}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Auth"],
+    }),
   }),
 });
 
@@ -74,4 +73,5 @@ export const {
   useVerifyEmailMutation,
   useResendEmailVerificationMutation,
   useGetMeQuery,
+  useUpdateUserMutation,
 } = authApi;
