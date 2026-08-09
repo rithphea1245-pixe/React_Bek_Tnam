@@ -174,10 +174,6 @@ export default function RegisterComponent() {
         }),
       );
       setVerified(true);
-      // Registered and logged in: go straight to the dashboard instead of
-      // showing a success screen the user would have to click through.
-      navigate("/dashboard/products");
-      return;
     } catch {
       setLoginError(
         isNewAccount
